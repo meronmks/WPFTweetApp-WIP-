@@ -60,5 +60,17 @@ namespace TweetApp
 
             listBox.ItemsSource = status;
         }
+
+        private void WindowKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.T:
+                    var TweetSendWindow = new TweetSendWindow(tokens);
+                    TweetSendWindow.ShowDialog();
+                    break;
+                    
+            }
+        }
     }
 }

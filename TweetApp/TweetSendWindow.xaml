@@ -1,0 +1,19 @@
+﻿<Window x:Class="TweetApp.TweetSendWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TweetApp"
+        mc:Ignorable="d"
+        Title="TweetSendWindow" Height="300" Width="300" Background="#FF252525" KeyDown="WindowKeyDown">
+    <Grid FocusManager.FocusedElement="{Binding ElementName=TweetTextBox}">
+        <TextBox x:Name="TweetTextBox" 
+                 Margin="10" 
+                 TextWrapping="Wrap" 
+                 AcceptsReturn="True"
+                 Background="#FF2E2E2E" 
+                 VerticalScrollBarVisibility="Auto"
+                 Foreground="#FFE0E0E0"/>
+
+    </Grid>
+</Window>
