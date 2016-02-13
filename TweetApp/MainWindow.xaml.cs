@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,8 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CoreTweet;
+using CoreTweet.Streaming;
 using TweetApp.CoreClass;
-using UniRx;
 
 namespace TweetApp
 {
@@ -27,13 +29,26 @@ namespace TweetApp
         public OAuth.OAuthSession Session { get; set; }
         private Tokens tokens { get; set; }
         public List<Status> status { get; set; }
-
-        
+        private IDisposable disposable { get; set; }
+        private ICollectionView view;
 
         public MainWindow()
         {
             InitializeComponent();
             status = new List<Status>();
+            listBox.ItemsSource = status;
+
+            view = CollectionViewSource.GetDefaultView(status);
+            view.SortDescriptions.Add(new SortDescription("CreatedAt.LocalDateTime", ListSortDirection.Descending));
+
+            var liveShaping = view as ICollectionViewLiveShaping;
+
+            if (liveShaping != null && liveShaping.CanChangeLiveSorting)
+            {
+                liveShaping.LiveSortingProperties.Add("CreatedAt.LocalDateTime");
+                liveShaping.IsLiveSorting = true;
+            }
+
             if (Properties.Settings.Default.AccessToken != "" &&
                 Properties.Settings.Default.AccessTokenSecret != "")
             {
@@ -42,6 +57,22 @@ namespace TweetApp
                     TwitterProperties.APISecret,
                     Properties.Settings.Default.AccessToken,
                     Properties.Settings.Default.AccessTokenSecret);
+
+                disposable = tokens.Streaming.UserAsObservable()
+                    .Where((StreamingMessage m) => m.Type == MessageType.Create)
+                    .Cast<StatusMessage>()
+                    .Select((StatusMessage m) => m.Status)
+                    .Subscribe((Status s) =>
+                    {
+                        status.Add(s);
+                        App.Current.Dispatcher.Invoke(
+                            new Action(() =>
+                            {
+                                view.Refresh();
+                            })
+                        );
+                        
+                    });
             }
             else
             {
@@ -57,8 +88,7 @@ namespace TweetApp
             {
                 status.Add(tweet);
             }
-
-            listBox.ItemsSource = status;
+            view.Refresh();
         }
 
         private void WindowKeyDown(object sender, KeyEventArgs e)
@@ -68,9 +98,13 @@ namespace TweetApp
                 case Key.T:
                     var TweetSendWindow = new TweetSendWindow(tokens);
                     TweetSendWindow.ShowDialog();
-                    break;
-                    
+                    break;                   
             }
+        }
+
+        private void WindowClosed(object sender, EventArgs e)
+        {
+            disposable.Dispose();
         }
     }
 }

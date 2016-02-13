@@ -3,25 +3,54 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         x:Class="TweetApp.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Background="#FF252525" KeyDown="WindowKeyDown">
+        Title="MainWindow" Height="350" Width="525" Background="#FF252525" KeyDown="WindowKeyDown" Closed="WindowClosed">
     <Window.Resources>
         <DataTemplate x:Key="DataTemplate">
-            <Grid>
-                <Image x:Name="icon" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="25"/>
-                <Image x:Name="RTicon" HorizontalAlignment="Left" Height="15" VerticalAlignment="Top" Width="15" Margin="10,30,0,0"/>
-                <TextBlock x:Name="NameText" HorizontalAlignment="Left" Margin="30,0,0,0" VerticalAlignment="Top" Foreground="#FFD8D8D8"><Run Text="{Binding User.Name}"/><InlineUIContainer>
-        		<TextBlock x:Name="ScreenNameicon" Text="@" Margin="5,0,0,0"/>
-        	</InlineUIContainer><InlineUIContainer>
-        		<TextBlock x:Name="ScreenNameText" Foreground="#FFD8D8D8" d:LayoutOverrides="TopPosition, BottomPosition" Margin="0" Text="{Binding  User.ScreenName}"/>
-        	</InlineUIContainer></TextBlock>
+            <Grid Width="Auto">
+                <Image x:Name="icon" 
+                       HorizontalAlignment="Left" 
+                       Height="25" 
+                       VerticalAlignment="Top" 
+                       Width="25"/>
+                <Image x:Name="RTicon" 
+                       HorizontalAlignment="Left" 
+                       Height="15" 
+                       VerticalAlignment="Top" 
+                       Width="15" 
+                       Margin="10,30,0,0"/>
+                <TextBlock x:Name="NameText" 
+                	HorizontalAlignment="Left" 
+                	Margin="30,0,0,0" 
+                	VerticalAlignment="Top" 
+                	Foreground="#FFD8D8D8">
+                    <Run Text="{Binding User.Name}"/>
+                    <Run Text=" "/>
+                    <InlineUIContainer>
+                		<TextBlock x:Name="ScreenNameicon" Text="@" Margin="5,0,0,0"/>
+                	</InlineUIContainer><InlineUIContainer>
+                		<TextBlock x:Name="ScreenNameText" 
+                                   Foreground="#FFD8D8D8" 
+                                   d:LayoutOverrides="TopPosition, BottomPosition" 
+                                   Margin="0" 
+                                   Width="Auto" 
+                                   Text="{Binding User.ScreenName}"/>
+                	</InlineUIContainer></TextBlock>
                 <TextBlock x:Name="textBlock"
-                           Margin="30,20.96,-14.42,8.08" 
+                           Margin="30,20.96,10,8.08" 
                            TextWrapping="Wrap" 
                            Text="{Binding Text}" 
                            VerticalAlignment="Stretch" 
-                           d:LayoutOverrides="Width, Height" 
+                           d:LayoutOverrides="Height" 
+                           Foreground="#FFD8D8D8"/>
+                <TextBlock x:Name="TimeText" 
+                           TextWrapping="Wrap" 
+                           Text="{Binding CreatedAt.LocalDateTime}" 
+                           HorizontalAlignment="Right" 
+                           Margin="0,0,10,0" 
+                           VerticalAlignment="Top"
                            Foreground="#FFD8D8D8"/>
             </Grid>
         </DataTemplate>
@@ -30,10 +59,8 @@
         <Button x:Name="button" Content="Button" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,10,0,0" Click="ButtonClick"/>
         <ListBox x:Name="listBox" 
                  Margin="10,35,10,10" 
-                 Background="#FF443F3F"
-                 ItemsSource="{Binding}" 
+                 Background="#FF443F3F" 
                  ItemTemplate="{DynamicResource DataTemplate}" 
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-        </ListBox>
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top"/>
     </Grid>
 </Window>
