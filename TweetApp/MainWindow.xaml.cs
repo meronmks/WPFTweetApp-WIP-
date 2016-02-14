@@ -75,7 +75,7 @@ namespace TweetApp
                                 listBox.ScrollIntoView(listBox.SelectedItem);
                                 //カーソルでの位置固定
                                 var lbi = listBox.ItemContainerGenerator.ContainerFromIndex(selectIndex) as ListBoxItem;
-                                lbi.Focus();
+                                lbi?.Focus();
                             })
                         );
                         
@@ -104,6 +104,7 @@ namespace TweetApp
             {
                 case Key.T:
                     var TweetSendWindow = new TweetSendWindow(Tokens);
+                    TweetSendWindow.Owner = Window.GetWindow(this); //オーナー設定
                     TweetSendWindow.ShowDialog();
                     break;                   
             }
