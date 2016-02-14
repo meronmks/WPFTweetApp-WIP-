@@ -9,7 +9,7 @@
         Title="MainWindow" Height="350" Width="525" Background="#FF252525" KeyDown="WindowKeyDown" Closed="WindowClosed">
     <Window.Resources>
         <DataTemplate x:Key="DataTemplate">
-            <Grid Width="Auto">
+            <Grid Width="Auto" Margin="0" Background="#FF292929">
                 <Image x:Name="icon" 
                        HorizontalAlignment="Left" 
                        Height="25" 

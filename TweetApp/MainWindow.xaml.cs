@@ -27,21 +27,21 @@ namespace TweetApp
     {
 
         public OAuth.OAuthSession Session { get; set; }
-        private Tokens tokens { get; set; }
-        public List<Status> status { get; set; }
-        private IDisposable disposable { get; set; }
-        private ICollectionView view;
+        private Tokens Tokens { get; set; }
+        public List<Status> Status { get; set; }
+        private IDisposable StreamingDisposable { get; set; }
+        private ICollectionView View;
 
         public MainWindow()
         {
             InitializeComponent();
-            status = new List<Status>();
-            listBox.ItemsSource = status;
+            Status = new List<Status>();
+            listBox.ItemsSource = Status;
 
-            view = CollectionViewSource.GetDefaultView(status);
-            view.SortDescriptions.Add(new SortDescription("CreatedAt.LocalDateTime", ListSortDirection.Descending));
+            View = CollectionViewSource.GetDefaultView(Status);
+            View.SortDescriptions.Add(new SortDescription("CreatedAt.LocalDateTime", ListSortDirection.Descending));
 
-            var liveShaping = view as ICollectionViewLiveShaping;
+            var liveShaping = View as ICollectionViewLiveShaping;
 
             if (liveShaping != null && liveShaping.CanChangeLiveSorting)
             {
@@ -52,23 +52,30 @@ namespace TweetApp
             if (Properties.Settings.Default.AccessToken != "" &&
                 Properties.Settings.Default.AccessTokenSecret != "")
             {
-                tokens = Tokens.Create(
+                Tokens = Tokens.Create(
                     TwitterProperties.APIKey,
                     TwitterProperties.APISecret,
                     Properties.Settings.Default.AccessToken,
                     Properties.Settings.Default.AccessTokenSecret);
 
-                disposable = tokens.Streaming.UserAsObservable()
+                StreamingDisposable = Tokens.Streaming.UserAsObservable()
                     .Where((StreamingMessage m) => m.Type == MessageType.Create)
                     .Cast<StatusMessage>()
                     .Select((StatusMessage m) => m.Status)
                     .Subscribe((Status s) =>
-                    {
-                        status.Add(s);
+                    {   
                         App.Current.Dispatcher.Invoke(
                             new Action(() =>
                             {
-                                view.Refresh();
+                                var selectIndex = listBox.SelectedIndex;
+                                selectIndex++;
+                                Status.Add(s);
+                                View.Refresh();
+                                listBox.SelectedIndex = selectIndex;
+                                listBox.ScrollIntoView(listBox.SelectedItem);
+                                //カーソルでの位置固定
+                                var lbi = listBox.ItemContainerGenerator.ContainerFromIndex(selectIndex) as ListBoxItem;
+                                lbi.Focus();
                             })
                         );
                         
@@ -84,11 +91,11 @@ namespace TweetApp
 
         private async void ButtonClick(object sender, RoutedEventArgs e)
         {
-            foreach (var tweet in await tokens.Statuses.HomeTimelineAsync())
+            foreach (var tweet in await Tokens.Statuses.HomeTimelineAsync())
             {
-                status.Add(tweet);
+                Status.Add(tweet);
             }
-            view.Refresh();
+            View.Refresh();
         }
 
         private void WindowKeyDown(object sender, KeyEventArgs e)
@@ -96,7 +103,7 @@ namespace TweetApp
             switch (e.Key)
             {
                 case Key.T:
-                    var TweetSendWindow = new TweetSendWindow(tokens);
+                    var TweetSendWindow = new TweetSendWindow(Tokens);
                     TweetSendWindow.ShowDialog();
                     break;                   
             }
@@ -104,7 +111,7 @@ namespace TweetApp
 
         private void WindowClosed(object sender, EventArgs e)
         {
-            disposable.Dispose();
+            StreamingDisposable.Dispose();
         }
     }
 }
