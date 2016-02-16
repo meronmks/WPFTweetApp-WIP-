@@ -6,7 +6,7 @@
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         x:Class="TweetApp.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Background="#FF252525" KeyDown="WindowKeyDown" Closed="WindowClosed">
+        Title="MainWindow" Height="350" Width="525" Background="#FF252525" KeyDown="WindowKeyDown" Closed="WindowClosed" Activated="WindowActivated">
     <Window.Resources>
         <DataTemplate x:Key="DataTemplate">
             <Grid Width="Auto" Margin="0" Background="#FF292929">
@@ -54,13 +54,28 @@
                            Foreground="#FFD8D8D8"/>
             </Grid>
         </DataTemplate>
+        <Storyboard x:Key="MainMenuLoadStoryBoard">
+            <ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Margin)" Storyboard.TargetName="wrapPanel">
+                <EasingThicknessKeyFrame KeyTime="0:0:0.2" Value="0"/>
+            </ThicknessAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="MainMenuDeleteStoryBoard">
+            <ThicknessAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Margin)" Storyboard.TargetName="wrapPanel">
+                <EasingThicknessKeyFrame KeyTime="0" Value="0"/>
+                <EasingThicknessKeyFrame KeyTime="0:0:0.2" Value="0,0,0,-35"/>
+            </ThicknessAnimationUsingKeyFrames>
+        </Storyboard>
     </Window.Resources>
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource MainMenuDeleteStoryBoard}"/>
+        </EventTrigger>
+    </Window.Triggers>
     <Grid>
-        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,10,0,0" Click="ButtonClick"/>
         <ListBox x:Name="listBox" 
-                 Margin="10,35,10,10" 
                  Background="#FF443F3F" 
                  ItemTemplate="{DynamicResource DataTemplate}" 
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top"/>
+        <WrapPanel x:Name="wrapPanel" Height="35" VerticalAlignment="Bottom" Margin="0,0,0,-35" Background="#FFA26000"/>
     </Grid>
 </Window>

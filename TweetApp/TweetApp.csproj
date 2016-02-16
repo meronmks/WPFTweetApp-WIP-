@@ -95,6 +95,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CoreClass\Enums.cs" />
     <Compile Include="TweetSendWindow.xaml.cs">
       <DependentUpon>TweetSendWindow.xaml</DependentUpon>
     </Compile>

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using CoreTweet;
+using TweetApp.CoreClass;
 
 namespace TweetApp
 {
@@ -21,31 +22,74 @@ namespace TweetApp
     public partial class TweetSendWindow : Window
     {
 
-        private Tokens tokens { get; set; }
+        private Tokens Tokens { get; set; }
+        private readonly TweetSendStatus sendStatus;
+        private long inReplyToStatusID;
+        private string SendText;
 
-        public TweetSendWindow(Tokens _tokens)
+        public TweetSendWindow(TweetSendStatus _sendStatus)
         {
             InitializeComponent();
-            tokens = _tokens;
+            Tokens = Tokens.Create(
+                TwitterProperties.APIKey,
+                TwitterProperties.APISecret,
+                Properties.Settings.Default.AccessToken,
+                Properties.Settings.Default.AccessTokenSecret);
+            sendStatus = _sendStatus;
+
+            switch (_sendStatus)
+            {
+                case TweetSendStatus.Post:
+                    Title = "新規ツイート";
+                    break;
+                case TweetSendStatus.Reply:
+                    Title = "新規リプライ";
+                    break;
+
+            }
+        }
+
+        public void SetInReplyToStatus(Status _inReplyToStatus)
+        {
+            inReplyToStatusID = _inReplyToStatus.Id;
+            TweetTextBox.Text = "@" + _inReplyToStatus.User.ScreenName + " ";
+            TweetTextBox.Select(TweetTextBox.Text.Length, 0);
         }
 
         private void WindowKeyDown(object sender, KeyEventArgs e)
         {
+            ModifierKeys modifierKeys = Keyboard.Modifiers;
             switch (e.Key)
             {
                 case Key.Escape:
                     Close();
                     break;
                 case Key.Enter:
-                    ModifierKeys modifierKeys = Keyboard.Modifiers;
-                    if ((modifierKeys & ModifierKeys.Control) != ModifierKeys.None)
-                    {
-                        tokens.Statuses.Update(status => TweetTextBox.Text);
-                        Close();
-                    }
+                    if ((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) break;
+                    SendText = TweetTextBox.Text;
+                    SendTweet();
                     break;
-
             }
+        }
+
+        private async void SendTweet()
+        {
+            StatusResponse result = new StatusResponse();
+
+            switch (sendStatus)
+            {
+                case TweetSendStatus.Post:
+                    result = await Tokens.Statuses
+                        .UpdateAsync(status => SendText);
+                    break;
+                case TweetSendStatus.Reply:
+                    result = await Tokens.Statuses
+                        .UpdateAsync(status => SendText,
+                        replyID => inReplyToStatusID);
+                    break;
+            }
+            if (result.Text == null) return;
+            Close();
         }
     }
 }

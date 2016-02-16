@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TweetApp"
-        mc:Ignorable="d"
-        Title="新規ツイート送信" Height="300" Width="300" Background="#FF252525" KeyDown="WindowKeyDown" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+        mc:Ignorable="d" Height="300" Width="300" Background="#FF252525" KeyDown="WindowKeyDown" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
     <Grid FocusManager.FocusedElement="{Binding ElementName=TweetTextBox}">
         <TextBox x:Name="TweetTextBox" 
                  Margin="10" 
