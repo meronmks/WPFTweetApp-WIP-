@@ -29,7 +29,7 @@ namespace TweetApp
 
         public OAuth.OAuthSession Session { get; set; }
         private Tokens Tokens { get; set; }
-        public List<Status> Status { get; set; }
+        public HashSet<Status> Status { get; set; }
         private IDisposable StreamingDisposable { get; set; }
         private ICollectionView View;
         private bool isShowMenu = false;
@@ -39,7 +39,7 @@ namespace TweetApp
         public MainWindow()
         {
             InitializeComponent();
-            Status = new List<Status>();
+            Status = new HashSet<Status>();
             listBox.ItemsSource = Status;
 
             View = CollectionViewSource.GetDefaultView(Status);
@@ -100,21 +100,26 @@ namespace TweetApp
         {
             try
             {
+                var flug = maxID.HasValue;
+                var selectIndex = listBox.SelectedIndex;
                 foreach (var tweet in await Tokens.Statuses.HomeTimelineAsync(null, null, maxID))
                 {
-                    if (Status.Contains(tweet)) continue;
-                    Status.Add(tweet);
-                    if (maxID == null) continue;
-                    var selectIndex = listBox.SelectedIndex;
-                    selectIndex++;
-                    View.Refresh();
-                    listBox.SelectedIndex = selectIndex;
-                    listBox.ScrollIntoView(listBox.SelectedItem);
-                    //カーソルでの位置固定
-                    var lbi = listBox.ItemContainerGenerator.ContainerFromIndex(selectIndex) as ListBoxItem;
-                    lbi?.Focus();
+                    if (Status.Contains(tweet) || flug)
+                    {
+                        flug = false;
+                        continue;
+                    }
+                    Status.Add(tweet);   
                 }
+                View.Refresh();
                 LoadLock = false;
+                if (maxID == null) return;
+                listBox.SelectedIndex = selectIndex++;
+                listBox.ScrollIntoView(listBox.SelectedItem);
+                //カーソルでの位置固定
+                var lbi = listBox.ItemContainerGenerator.ContainerFromIndex(selectIndex) as ListBoxItem;
+                lbi?.Focus();
+                
             }
             catch (Exception exception)
             {
