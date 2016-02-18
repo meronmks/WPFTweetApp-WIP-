@@ -68,15 +68,16 @@ namespace TweetApp
                     .Where((StreamingMessage m) => m.Type == MessageType.Create)
                     .Cast<StatusMessage>()
                     .Select((StatusMessage m) => m.Status)
-                    .Subscribe((Status s) =>
+                    .Subscribe((Status tweet) =>
                     {   
                         App.Current.Dispatcher.Invoke(
                             new Action(() =>
                             {
-                                if (Status.Contains(s)) return;
-                                Status.Add(s);
+                                if (Status.Contains(tweet)) return;
+                                tweet.Source = SourceHTMLParser(tweet.Source);
+                                Status.Add(tweet);
                                 var selectIndex = listBox.SelectedIndex;
-                                selectIndex++;
+                                if (selectIndex != 0) selectIndex++;
                                 View.Refresh();
                                 listBox.SelectedIndex = selectIndex;
                                 listBox.ScrollIntoView(listBox.SelectedItem);
@@ -109,7 +110,8 @@ namespace TweetApp
                         flug = false;
                         continue;
                     }
-                    Status.Add(tweet);   
+                    tweet.Source = SourceHTMLParser(tweet.Source);
+                    Status.Add(tweet);
                 }
                 View.Refresh();
                 LoadLock = false;
@@ -181,6 +183,22 @@ namespace TweetApp
         private void WindowActivated(object sender, EventArgs e)
         {
             listBox.Focus();
+        }
+
+        /// <summary>
+        /// StatusのSourceからVia名抜き出し
+        /// </summary>
+        /// <param name="html"></param>
+        /// <returns></returns>
+        private string SourceHTMLParser(string html)
+        {
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.OptionAutoCloseOnEnd = false;
+            doc.OptionCheckSyntax = false;
+            doc.OptionFixNestedTags = true;
+            doc.LoadHtml(html);
+            var nodes = doc.DocumentNode.SelectSingleNode("//a");
+            return nodes.InnerText;
         }
     }
 }

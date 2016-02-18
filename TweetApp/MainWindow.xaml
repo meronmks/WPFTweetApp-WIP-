@@ -10,7 +10,7 @@
         Title="MainWindow" Height="350" Width="525" Background="#FF252525" KeyDown="WindowKeyDown" Closed="WindowClosed" Activated="WindowActivated">
     <Window.Resources>
         <DataTemplate x:Key="DataTemplate">
-            <Grid Width="Auto" Margin="0" Background="#FF292929">
+            <Grid Width="Auto" Margin="0" Background="#FF292929" Height="Auto">
                 <Image x:Name="icon" 
                        HorizontalAlignment="Left" 
                        Height="30" 
@@ -103,11 +103,10 @@
                 	</InlineUIContainer>
                 </TextBlock>
                 <TextBlock x:Name="textBlock"
-                           Margin="35,20.96,10,8.08" 
+                           Margin="35,20.96,10,21" 
                            TextWrapping="Wrap"
                            VerticalAlignment="Stretch" 
-                           d:LayoutOverrides="Height" 
-                           Foreground="#FFD8D8D8">
+                           Foreground="#FFD8D8D8" d:LayoutOverrides="Height">
                     <TextBlock.Resources>
                         <conv:IsNullConverter x:Key="isNullConverter"/>
                     </TextBlock.Resources>
@@ -126,11 +125,20 @@
                 </TextBlock>
                 <TextBlock x:Name="TimeText" 
                            TextWrapping="Wrap" 
-                           Text="{Binding CreatedAt.LocalDateTime}" 
+                           Text="{Binding CreatedAt.LocalDateTime, ConverterCulture=ja-JP}" 
                            HorizontalAlignment="Right" 
                            Margin="0,0,10,0" 
                            VerticalAlignment="Top"
                            Foreground="#FFD8D8D8"/>
+
+                <TextBlock x:Name="ViaText" 
+                           Margin="0,0,10,0" 
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Bottom" 
+                           Foreground="#FFD8D8D8" 
+                           HorizontalAlignment="Right" 
+                           Width="Auto"
+                           Text="{Binding Source}"/>
             </Grid>
         </DataTemplate>
         <Storyboard x:Key="MainMenuLoadStoryBoard">
