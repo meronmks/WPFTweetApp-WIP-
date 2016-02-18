@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:conv="clr-namespace:TweetApp.CoreClass"
         x:Class="TweetApp.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525" Background="#FF252525" KeyDown="WindowKeyDown" Closed="WindowClosed" Activated="WindowActivated">
@@ -12,39 +13,117 @@
             <Grid Width="Auto" Margin="0" Background="#FF292929">
                 <Image x:Name="icon" 
                        HorizontalAlignment="Left" 
-                       Height="25" 
+                       Height="30" 
                        VerticalAlignment="Top" 
-                       Width="25"/>
+                       Width="30">
+                    <Image.Resources>
+                        <conv:IsNullConverter x:Key="isNullConverter"/>
+                    </Image.Resources>
+                    <Image.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="true">
+                                    <Setter Property="Image.Source" Value="{Binding User.ProfileImageUrlHttps}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="false">
+                                    <Setter Property="Image.Source" Value="{Binding RetweetedStatus.User.ProfileImageUrlHttps}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
                 <Image x:Name="RTicon" 
                        HorizontalAlignment="Left" 
-                       Height="15" 
+                       Height="25" 
                        VerticalAlignment="Top" 
-                       Width="15" 
-                       Margin="10,30,0,0"/>
+                       Width="25" 
+                       Margin="5,33,0,0">
+                    <Image.Resources>
+                        <conv:IsNullConverter x:Key="isNullConverter"/>
+                    </Image.Resources>
+                    <Image.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="false">
+                                    <Setter Property="Image.Source" Value="{Binding User.ProfileImageUrlHttps}" />
+                                    <Setter Property="Image.Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="true">
+                                    <Setter Property="Image.Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
                 <TextBlock x:Name="NameText" 
-                	HorizontalAlignment="Left" 
-                	Margin="30,0,0,0" 
+                	HorizontalAlignment="Stretch" 
+                	Margin="35,0,20,0" 
                 	VerticalAlignment="Top" 
-                	Foreground="#FFD8D8D8">
-                    <Run Text="{Binding User.Name}"/>
-                    <Run Text=" "/>
+                	Foreground="#FFD8D8D8" d:LayoutOverrides="Width">
+                    <TextBlock.Resources>
+                        <conv:IsNullConverter x:Key="isNullConverter"/>
+                    </TextBlock.Resources>
+                    <TextBlock.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="true">
+                                    <Setter Property="TextBlock.Text" Value="{Binding User.Name}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="false">
+                                    <Setter Property="TextBlock.Text" Value="{Binding RetweetedStatus.User.Name}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
                     <InlineUIContainer>
-                		<TextBlock x:Name="ScreenNameicon" Text="@" Margin="5,0,0,0"/>
-                	</InlineUIContainer><InlineUIContainer>
+                		<TextBlock x:Name="ScreenNameicon" Text="@" Margin="10,0,0,0"/>
+                	</InlineUIContainer>
+                    <InlineUIContainer>
                 		<TextBlock x:Name="ScreenNameText" 
                                    Foreground="#FFD8D8D8" 
                                    d:LayoutOverrides="TopPosition, BottomPosition" 
-                                   Margin="0" 
-                                   Width="Auto" 
-                                   Text="{Binding User.ScreenName}"/>
-                	</InlineUIContainer></TextBlock>
+                                   Margin="-4,0,0,0" 
+                                   Width="Auto" >
+                            <TextBlock.Resources>
+                                <conv:IsNullConverter x:Key="isNullConverter"/>
+                            </TextBlock.Resources>
+                            <TextBlock.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="true">
+                                            <Setter Property="TextBlock.Text" Value="{Binding User.ScreenName}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="false">
+                                            <Setter Property="TextBlock.Text" Value="{Binding RetweetedStatus.User.ScreenName}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                	</InlineUIContainer>
+                </TextBlock>
                 <TextBlock x:Name="textBlock"
-                           Margin="30,20.96,10,8.08" 
-                           TextWrapping="Wrap" 
-                           Text="{Binding Text}" 
+                           Margin="35,20.96,10,8.08" 
+                           TextWrapping="Wrap"
                            VerticalAlignment="Stretch" 
                            d:LayoutOverrides="Height" 
-                           Foreground="#FFD8D8D8"/>
+                           Foreground="#FFD8D8D8">
+                    <TextBlock.Resources>
+                        <conv:IsNullConverter x:Key="isNullConverter"/>
+                    </TextBlock.Resources>
+                    <TextBlock.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="true">
+                                    <Setter Property="TextBlock.Text" Value="{Binding Text}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="false">
+                                    <Setter Property="TextBlock.Text" Value="{Binding RetweetedStatus.Text}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <TextBlock x:Name="TimeText" 
                            TextWrapping="Wrap" 
                            Text="{Binding CreatedAt.LocalDateTime}" 
