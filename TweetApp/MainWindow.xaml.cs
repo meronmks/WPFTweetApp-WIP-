@@ -75,6 +75,10 @@ namespace TweetApp
                             {
                                 if (Status.Contains(tweet)) return;
                                 tweet.Source = SourceHTMLParser(tweet.Source);
+                                if (tweet.RetweetedStatus != null)
+                                {
+                                    tweet.RetweetedStatus.Source = SourceHTMLParser(tweet.RetweetedStatus.Source);
+                                }
                                 Status.Add(tweet);
                                 var selectIndex = listBox.SelectedIndex;
                                 if (selectIndex != 0) selectIndex++;
@@ -165,6 +169,10 @@ namespace TweetApp
                         continue;
                     }
                     tweet.Source = SourceHTMLParser(tweet.Source);
+                    if (tweet.RetweetedStatus != null)
+                    {
+                        tweet.RetweetedStatus.Source = SourceHTMLParser(tweet.RetweetedStatus.Source);
+                    }
                     Status.Add(tweet);
                 }
                 View.Refresh();

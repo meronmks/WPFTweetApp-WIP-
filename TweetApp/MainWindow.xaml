@@ -133,12 +133,26 @@
 
                 <TextBlock x:Name="ViaText" 
                            Margin="0,0,10,0" 
-                           TextWrapping="Wrap"
                            VerticalAlignment="Bottom" 
                            Foreground="#FFD8D8D8" 
                            HorizontalAlignment="Right" 
-                           Width="Auto"
-                           Text="{Binding Source}"/>
+                           Width="Auto">
+                    <TextBlock.Resources>
+                        <conv:IsNullConverter x:Key="isNullConverter"/>
+                    </TextBlock.Resources>
+                    <TextBlock.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="true">
+                                    <Setter Property="TextBlock.Text" Value="{Binding Source}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RetweetedStatus, Converter={StaticResource isNullConverter}}" Value="false">
+                                    <Setter Property="TextBlock.Text" Value="{Binding RetweetedStatus.Source}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
         </DataTemplate>
         <Storyboard x:Key="MainMenuLoadStoryBoard">
