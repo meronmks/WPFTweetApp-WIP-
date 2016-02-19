@@ -69,8 +69,8 @@ namespace TweetApp
                     .Cast<StatusMessage>()
                     .Select((StatusMessage m) => m.Status)
                     .Subscribe((Status tweet) =>
-                    {   
-                        App.Current.Dispatcher.Invoke(
+                    {
+                        Application.Current.Dispatcher.Invoke(
                             new Action(() =>
                             {
                                 if (Status.Contains(tweet)) return;
@@ -97,6 +97,60 @@ namespace TweetApp
             }
         }
 
+        private void WindowKeyDown(object sender, KeyEventArgs e)
+        {
+            modifierKeys = Keyboard.Modifiers;
+            var listItem = listBox.SelectedItem as Status;
+            switch (e.Key)
+            {
+                case Key.N:               
+                    if ((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) break;
+                    var TweetSendWindow = new TweetSendWindow(TweetSendStatus.Post);
+                    TweetSendWindow.Owner = Window.GetWindow(this); //オーナー設定
+                    TweetSendWindow.ShowDialog();
+                    break;             
+                case Key.Escape:
+                    SwitchMenu();
+                    break;
+                case Key.R:
+                    if (((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) || listBox.SelectedItem == null) break;
+                    var ReplySendWindow = new TweetSendWindow(TweetSendStatus.Reply);
+                    ReplySendWindow.Owner = Window.GetWindow(this); //オーナー設定
+                    ReplySendWindow.SetInReplyToStatus(listItem);
+                    ReplySendWindow.ShowDialog();
+                    break;
+                case Key.F5:
+                    GetHomeTimeLineAsync();
+                    break;
+                case Key.T:
+                    if (((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) || listBox.SelectedItem == null) break;
+                    var result = MessageBox.Show(listItem.Text + "\r\nをRTしてよろしいですか？", "確認", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.No) break;
+                    ReTweetAsync(listItem.Id);
+                    break;
+                case Key.Down:
+                    var selectIndex = listBox.SelectedIndex;
+                    if (listBox.Items.Count != selectIndex + 1 || LoadLock) break;
+                    LoadLock = true;
+                    GetHomeTimeLineAsync(listItem?.Id);
+                    break;
+            }
+        }
+
+        private void WindowClosed(object sender, EventArgs e)
+        {
+            StreamingDisposable.Dispose();
+        }
+
+        private void WindowActivated(object sender, EventArgs e)
+        {
+            listBox.Focus();
+        }
+
+        /// <summary>
+        /// ツイート取得に関する奴
+        /// </summary>
+        /// <param name="maxID"></param>
         private async void GetHomeTimeLineAsync(long? maxID = null)
         {
             try
@@ -121,74 +175,31 @@ namespace TweetApp
                 //カーソルでの位置固定
                 var lbi = listBox.ItemContainerGenerator.ContainerFromIndex(selectIndex) as ListBoxItem;
                 lbi?.Focus();
-                
+
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Error!");
             }
-            
+
         }
 
-        private void WindowKeyDown(object sender, KeyEventArgs e)
+        private async void ReTweetAsync(long tweetID)
         {
-            modifierKeys = Keyboard.Modifiers;
-            var listItem = listBox.SelectedItem as Status;
-            switch (e.Key)
+            try
             {
-                case Key.T:               
-                    if ((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) break;
-                    var TweetSendWindow = new TweetSendWindow(TweetSendStatus.Post);
-                    TweetSendWindow.Owner = Window.GetWindow(this); //オーナー設定
-                    TweetSendWindow.ShowDialog();
-                    break;             
-                case Key.Escape:
-                    if (isShowMenu == false)
-                    {
-                        var s = TryFindResource("MainMenuLoadStoryBoard") as Storyboard;
-                        BeginStoryboard(s);
-                        isShowMenu = true;
-                    }
-                    else
-                    {
-                        var s = TryFindResource("MainMenuDeleteStoryBoard") as Storyboard;
-                        BeginStoryboard(s);
-                        isShowMenu = false;
-                    }
-                    break;
-                case Key.R:
-                    if (((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) || listBox.SelectedItem == null) break;
-                    var ReplySendWindow = new TweetSendWindow(TweetSendStatus.Reply);
-                    ReplySendWindow.Owner = Window.GetWindow(this); //オーナー設定
-                    ReplySendWindow.SetInReplyToStatus(listItem);
-                    ReplySendWindow.ShowDialog();
-                    break;
-                case Key.F5:
-                    GetHomeTimeLineAsync();
-                    break;
-                case Key.Down:
-                    var selectIndex = listBox.SelectedIndex;
-                    if (listBox.Items.Count != selectIndex + 1 || LoadLock) break;
-                    LoadLock = true;
-                    GetHomeTimeLineAsync(listItem?.Id);
-                    break;
+                await Tokens.Statuses.RetweetAsync(id => tweetID);
             }
-        }
-
-        private void WindowClosed(object sender, EventArgs e)
-        {
-            StreamingDisposable.Dispose();
-        }
-
-        private void WindowActivated(object sender, EventArgs e)
-        {
-            listBox.Focus();
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error!");
+            }
         }
 
         /// <summary>
         /// StatusのSourceからVia名抜き出し
         /// </summary>
-        /// <param name="html"></param>
+        /// <param name="html">Source</param>
         /// <returns></returns>
         private string SourceHTMLParser(string html)
         {
@@ -199,6 +210,25 @@ namespace TweetApp
             doc.LoadHtml(html);
             var nodes = doc.DocumentNode.SelectSingleNode("//a");
             return nodes.InnerText;
+        }
+
+        /// <summary>
+        /// メニューの出し入れ操作
+        /// </summary>
+        private void SwitchMenu()
+        {
+            if (isShowMenu == false)
+            {
+                var s = TryFindResource("MainMenuLoadStoryBoard") as Storyboard;
+                BeginStoryboard(s);
+                isShowMenu = true;
+            }
+            else
+            {
+                var s = TryFindResource("MainMenuDeleteStoryBoard") as Storyboard;
+                BeginStoryboard(s);
+                isShowMenu = false;
+            }
         }
     }
 }

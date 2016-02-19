@@ -163,6 +163,6 @@
                  Background="#FF443F3F" 
                  ItemTemplate="{DynamicResource DataTemplate}" 
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top"/>
-        <WrapPanel x:Name="wrapPanel" Height="35" VerticalAlignment="Bottom" Margin="0,0,0,-35" Background="#FFA26000"/>
+        <WrapPanel x:Name="wrapPanel" Height="35" VerticalAlignment="Bottom" Margin="0,0,0,-35" Background="#FFA26000" d:IsHidden="True"/>
     </Grid>
 </Window>
