@@ -123,14 +123,20 @@ namespace TweetApp
                     ReplySendWindow.SetInReplyToStatus(listItem);
                     ReplySendWindow.ShowDialog();
                     break;
+                case Key.F:
+                    if (((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) || listBox.SelectedItem == null) break;
+                    var favResult = MessageBox.Show(listItem?.Text + "\r\nをお気に入りしてよろしいですか？", "確認", MessageBoxButton.YesNo);
+                    if (favResult == MessageBoxResult.No) break;
+                    FavTweetAsync(listItem?.Id);
+                    break;
                 case Key.F5:
                     GetHomeTimeLineAsync();
                     break;
                 case Key.T:
                     if (((modifierKeys & ModifierKeys.Control) == ModifierKeys.None) || listBox.SelectedItem == null) break;
-                    var result = MessageBox.Show(listItem.Text + "\r\nをRTしてよろしいですか？", "確認", MessageBoxButton.YesNo);
-                    if (result == MessageBoxResult.No) break;
-                    ReTweetAsync(listItem.Id);
+                    var rtResult = MessageBox.Show(listItem?.Text + "\r\nをRTしてよろしいですか？", "確認", MessageBoxButton.YesNo);
+                    if (rtResult == MessageBoxResult.No) break;
+                    ReTweetAsync(listItem?.Id);
                     break;
                 case Key.Down:
                     var selectIndex = listBox.SelectedIndex;
@@ -192,8 +198,13 @@ namespace TweetApp
 
         }
 
-        private async void ReTweetAsync(long tweetID)
+        /// <summary>
+        /// RTの非同期処理
+        /// </summary>
+        /// <param name="tweetID"></param>
+        private async void ReTweetAsync(long? tweetID)
         {
+            if (!tweetID.HasValue) return;
             try
             {
                 await Tokens.Statuses.RetweetAsync(id => tweetID);
@@ -204,6 +215,22 @@ namespace TweetApp
             }
         }
 
+        /// <summary>
+        /// Favの非同期処理
+        /// </summary>
+        /// <param name="tweetID"></param>
+        private async void FavTweetAsync(long? tweetID)
+        {
+            if (!tweetID.HasValue) return;
+            try
+            {
+                await Tokens.Favorites.CreateAsync(id => tweetID);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error!");
+            }
+        }
         /// <summary>
         /// StatusのSourceからVia名抜き出し
         /// </summary>
