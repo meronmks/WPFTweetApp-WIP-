@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,12 +75,7 @@ namespace TweetApp
                             new Action(() =>
                             {
                                 if (Status.Contains(tweet)) return;
-                                tweet.Source = SourceHTMLParser(tweet.Source);
-                                if (tweet.RetweetedStatus != null)
-                                {
-                                    tweet.RetweetedStatus.Source = SourceHTMLParser(tweet.RetweetedStatus.Source);
-                                }
-                                Status.Add(tweet);
+                                Status.Add(TweetProcessing(tweet));
                                 var selectIndex = listBox.SelectedIndex;
                                 if (selectIndex != 0) selectIndex++;
                                 View.Refresh();
@@ -174,12 +170,7 @@ namespace TweetApp
                         flug = false;
                         continue;
                     }
-                    tweet.Source = SourceHTMLParser(tweet.Source);
-                    if (tweet.RetweetedStatus != null)
-                    {
-                        tweet.RetweetedStatus.Source = SourceHTMLParser(tweet.RetweetedStatus.Source);
-                    }
-                    Status.Add(tweet);
+                    Status.Add(TweetProcessing(tweet));
                 }
                 View.Refresh();
                 LoadLock = false;
@@ -196,6 +187,23 @@ namespace TweetApp
                 MessageBox.Show(exception.Message, "Error!");
             }
 
+        }
+
+        /// <summary>
+        /// Listに入れる前にtweetStatusを加工するもの
+        /// </summary>
+        /// <param name="tweet"></param>
+        /// <returns></returns>
+        private Status TweetProcessing(Status tweet)
+        {
+            tweet.Source = SourceHTMLParser(tweet.Source);
+            if (tweet.RetweetedStatus != null)
+            {
+                tweet.RetweetedStatus.Text = WebUtility.HtmlDecode(tweet.RetweetedStatus.Text);
+                tweet.RetweetedStatus.Source = SourceHTMLParser(tweet.RetweetedStatus.Source);
+            }
+            tweet.Text = WebUtility.HtmlDecode(tweet.Text);
+            return tweet;
         }
 
         /// <summary>
@@ -238,10 +246,12 @@ namespace TweetApp
         /// <returns></returns>
         private string SourceHTMLParser(string html)
         {
-            var doc = new HtmlAgilityPack.HtmlDocument();
-            doc.OptionAutoCloseOnEnd = false;
-            doc.OptionCheckSyntax = false;
-            doc.OptionFixNestedTags = true;
+            var doc = new HtmlAgilityPack.HtmlDocument
+            {
+                OptionAutoCloseOnEnd = false,
+                OptionCheckSyntax = false,
+                OptionFixNestedTags = true
+            };
             doc.LoadHtml(html);
             var nodes = doc.DocumentNode.SelectSingleNode("//a");
             return nodes.InnerText;
